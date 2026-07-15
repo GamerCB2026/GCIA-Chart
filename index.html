@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Charter AI | FNF Project</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>FNF Auto-Charter AI</h1>
+        <p>Genera charts automáticos para Psych Engine y V-Slice usando el ritmo de la música</p>
+    </header>
+
+    <!-- Zona para arrastrar audio -->
+    <div class="dropzone" id="dropzone">
+        <p>Arrastra tu archivo de audio aquí o haz clic para buscar</p>
+        <span>Soporta .ogg y .mp3</span>
+        <input type="file" id="audio-input" accept="audio/ogg, audio/mp3" style="display: none;">
+    </div>
+
+    <!-- Info del archivo cargado -->
+    <div class="file-info" id="file-info">
+        <strong>Archivo cargado:</strong> <span id="file-name">-</span> <br>
+        <strong>Duración estimada:</strong> <span id="file-duration">-</span>
+    </div>
+
+    <!-- Panel de Controles Simplificado -->
+    <div class="controls-grid">
+        <div class="control-group">
+            <label for="bpm-input">BPM de la Canción</label>
+            <input type="number" id="bpm-input" value="120" min="20" max="300">
+        </div>
+        <div class="control-group">
+            <label for="sensitivity-input">Sensibilidad IA (Umbral)</label>
+            <input type="range" id="sensitivity-input" min="0.1" max="0.9" step="0.05" value="0.3">
+        </div>
+        <div class="control-group">
+            <label for="engine-select">Formato del Engine</label>
+            <select id="engine-select">
+                <option value="vslice">V-Slice (0.3+)</option>
+                <option value="psych">Psych Engine (0.7+)</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn-generate" id="btn-generate">Generar Chart Automático</button>
+
+    <!-- Panel de Asistente IA (Gemini Integrado) -->
+    <div class="ia-panel" style="margin-top: 25px; border: 1px solid rgba(0, 242, 254, 0.3); padding: 20px; border-radius: 8px; background: rgba(0, 242, 254, 0.02);">
+        <h3 style="color: var(--accent-color); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+            ✨ Modificador de Chart con IA
+        </h3>
+        <p style="font-size: 0.85rem; color: #85929e; margin-top: -5px; margin-bottom: 20px;">
+            Primero procesa el audio arriba y luego indica aquí la dificultad deseada (easy, normal, hard) y los cambios de ritmo que quieras aplicar.
+        </p>
+
+        <div class="control-group">
+            <label for="ia-prompt" style="color: var(--text-bright); font-weight: 600; margin-bottom: 8px;">¿Cómo quieres personalizar tu chart?</label>
+            <textarea id="ia-prompt" rows="3" style="background-color: #121824; border: 1px solid #34495e; color: var(--text-bright); padding: 10px; border-radius: 6px; font-family: sans-serif; resize: vertical;" placeholder="Ej: quiero una dificultad hard con notas rápidas..."></textarea>
+        </div>
+        
+        <button class="btn-generate" id="btn-ia-modify" style="background: linear-gradient(45deg, #a855f7, var(--accent-secondary)); margin-top: 15px; margin-bottom: 0;">
+            Aplicar Directivas con IA
+        </button>
+    </div>
+
+    <!-- Log de lo que hace el script -->
+    <div class="terminal" id="terminal" style="margin-top: 25px;">
+        [Consola]: Esperando archivo de audio y configuración...
+    </div>
+</div>
+
+<script src="js/script.js"></script>
+<script src="api/modify-chart.js"></script>
+</body>
+</html>
