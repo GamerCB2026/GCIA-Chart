@@ -116,6 +116,13 @@
                 Pide modificaciones rítmicas, variaciones de dificultad inteligentes o adaptaciones en base a las voces cargadas.
             </p>
 
+            <!-- NUEVO CAMPO PARA LA API KEY DEL USUARIO -->
+            <div>
+                <label class="block text-xs font-bold uppercase text-[#00f2fe] mb-2">Tu API Key de Gemini (Requerido)</label>
+                <input type="password" id="api-key-input" placeholder="Pega tu API Key de Google AI Studio (ej. AIzaSy...)" class="w-full bg-[#121824] border border-[#34495e] rounded-xl p-3 text-sm focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none text-white transition">
+                <span class="text-[10px] text-slate-500 mt-1 block">Tu clave se guarda de forma segura únicamente en tu navegador (LocalStorage).</span>
+            </div>
+
             <div>
                 <label class="block text-xs font-bold uppercase text-slate-400 mb-2">¿Cómo quieres que la IA personalice el chart?</label>
                 <textarea id="ia-prompt" placeholder="Ejemplo: Si hay Voz 1 y Voz 2, haz que canten alternándose en modo dueto. En las partes rápidas de la Voz 2 añade jacks..." class="w-full h-24 bg-[#121824] border border-[#34495e] rounded-xl p-3 text-sm focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none resize-none placeholder-slate-600 text-white transition"></textarea>
@@ -125,8 +132,6 @@
                 Aplicar Directivas con IA
             </button>
         </div>
-
-    </div>
 
     <!-- Carga del Script de Lógica Unificada -->
     <script src="api/modify-chart.js"></script>
