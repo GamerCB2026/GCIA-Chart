@@ -1,6 +1,5 @@
-// CONFIGURACIÓN DE LA API DE GEMINI (Completamente invisible al usuario)
-const GEMINI_API_KEY = "AQ.Ab8RN6IkhUhljWaNg7jSv5Ohq8SCTXfk9d9tYol9FeO27g5JxA"; 
-const GEMINI_MODEL = "gemini-3-flash-preview";
+// CONFIGURACIÓN DEL MODELO (La clave ahora la proporciona el usuario)
+const GEMINI_MODEL = "gemini-3-flash-preview"; 
 
 // Referencias del DOM
 const fileInputs = {
@@ -22,6 +21,7 @@ const engineSelect = document.getElementById('engine-select');
 const btnGenerate = document.getElementById('btn-generate');
 
 const iaPromptInput = document.getElementById('ia-prompt');
+const apiKeyInput = document.getElementById('api-key-input'); // Nuevo input de API Key
 const btnIaModify = document.getElementById('btn-ia-modify');
 
 // Almacén de archivos de audio decodificados y crudos
@@ -34,6 +34,12 @@ function log(mensaje) {
     const time = new Date().toLocaleTimeString();
     terminal.innerHTML += `<br>[${time}]: ${mensaje}`;
     terminal.scrollTop = terminal.scrollHeight;
+}
+
+// Cargar la API Key guardada del usuario si existe
+if (localStorage.getItem('user_gemini_api_key')) {
+    apiKeyInput.value = localStorage.getItem('user_gemini_api_key');
+    log('<span style="color: #4facfe;">[SISTEMA]: API Key cargada desde la memoria de tu navegador.</span>');
 }
 
 // Configurar los listeners de cambios de archivos
@@ -150,24 +156,31 @@ btnGenerate.addEventListener('click', async () => {
     }
 });
 
-// 2. ENVIAR A LA IA DE GEMINI (Con filtro de voces inteligente y auto-recuperación)
+// 2. ENVIAR A LA IA DE GEMINI (Utilizando la clave provista por el usuario)
 btnIaModify.addEventListener('click', async () => {
+    const userApiKey = apiKeyInput.value.trim();
     const promptUsuario = iaPromptInput.value.trim();
 
+    if (!userApiKey) {
+        log('<span style="color: #ff4757;">Error: Debes ingresar tu propia API Key de Gemini para continuar.</span>');
+        return;
+    }
     if (!chartActual) {
         log('<span style="color: #ff4757;">Error: Analiza primero los audios utilizando el botón de arriba.</span>');
         return;
     }
     if (!promptUsuario) {
-        log('<span style="color: #ff4757;">Error: Proporciona indicaciones a la IA (ej. "Crea un dueto alternado según las voces").</span>');
+        log('<span style="color: #ff4757;">Error: Proporciona indicaciones a la IA (ej. "Crea un dueto alternado").</span>');
         return;
     }
+
+    // Guardar la API Key en localStorage para la comodidad del usuario
+    localStorage.setItem('user_gemini_api_key', userApiKey);
 
     log('Estableciendo conexión segura con Gemini...');
     btnIaModify.disabled = true;
     btnIaModify.innerText = "La IA está pensando...";
 
-    // System prompt con tus reglas estrictas de filtrado de audios e instrumental
     const systemPrompt = `Eres un experto charter de Friday Night Funkin'. Tu única tarea es estructurar y devolver el JSON del chart optimizado.
 
 REGLAS DE DISTRIBUCIÓN Y FILTRADO DE VOCES (DIRECCIÓN "d"):
@@ -189,9 +202,8 @@ FORMATO DEL ENGINE:
 
 Devuelve ÚNICAMENTE el JSON estructurado. No agregues explicaciones, introducciones o bloques de código markdown.`;
 
-    // Función auxiliar para realizar la petición fetch
-    async function realizarPeticion(modelo) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${GEMINI_API_KEY}`;
+    async function realizarPeticion(modelo, key) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${key}`;
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -205,7 +217,7 @@ Devuelve ÚNICAMENTE el JSON estructurado. No agregues explicaciones, introducci
                 }],
                 generationConfig: {
                     responseMimeType: "application/json",
-                    temperature: 0.15 // Temperatura más baja para mayor precisión matemática
+                    temperature: 0.15
                 }
             })
         });
@@ -230,18 +242,16 @@ Devuelve ÚNICAMENTE el JSON estructurado. No agregues explicaciones, introducci
     try {
         let textoRespuesta;
         try {
-            // Intento 1: Usar tu modelo principal configurado
             log(`Intentando conectar con modelo principal: ${GEMINI_MODEL}...`);
-            textoRespuesta = await realizarPeticion(GEMINI_MODEL);
+            textoRespuesta = await realizarPeticion(GEMINI_MODEL, userApiKey);
         } catch (errorPrincipal) {
-            // Si el servidor está saturado (503/UNAVAILABLE) u ocurre otro error, pasamos al plan B de respaldo
-            log(`<span style="color: #e67e22;">Aviso: Modelo principal ocupado o no disponible (${errorPrincipal.message}). Conectando con servidor de respaldo (1.5-flash)...</span>`);
-            textoRespuesta = await realizarPeticion("gemini-1.5-flash");
+            log(`<span style="color: #e67e22;">Aviso: Modelo principal ocupado o no disponible. Conectando con servidor de respaldo (1.5-flash)...</span>`);
+            textoRespuesta = await realizarPeticion("gemini-1.5-flash", userApiKey);
         }
         
         const nuevoChart = JSON.parse(textoRespuesta);
 
-        log('<span style="color: #4af626;">¡La IA procesó con éxito tu chart aplicando tus filtros de voz e instrumental! Descargando archivo...</span>');
+        log('<span style="color: #4af626;">¡La IA procesó con éxito tu chart! Descargando archivo...</span>');
         
         const dificultadMapeada = promptUsuario.toLowerCase().includes("hard") ? "hard" : 
                                  (promptUsuario.toLowerCase().includes("easy") ? "easy" : chartActual.metadata.baseDifficulty);
@@ -276,4 +286,4 @@ function descargarJSON(obj, filename) {
     } catch (e) {
         console.error("Error al gestionar descarga:", e);
     }
-}
+}s
