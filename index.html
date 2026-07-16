@@ -3,77 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GCIA Chart | FNF Project</title>
-    <link rel="stylesheet" href="style.css">
+    <title>GCIA Chart - V0.8 BETA</title>
+    <!-- Tailwind CSS para el diseño -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #c5c6c7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* Personalización de la consola de logs */
+        .terminal {
+            background-color: #05070a;
+            border-left: 3px solid #00f2fe;
+            font-family: 'Courier New', Courier, monospace;
+            color: #4af626;
+        }
+    </style>
 </head>
-<body>
+<body class="p-6 min-h-screen flex flex-col items-center justify-center">
 
-<div class="container">
-    <header>
-        <h1>FNF / GCIA CHART</h1>
-        <p>Genera charts automáticos para Psych Engine y V-Slice usando el ritmo de la música</p>
-    </header>
-
-    <!-- Zona para arrastrar audio -->
-    <div class="dropzone" id="dropzone">
-        <p>Arrastra tu archivo de audio aquí o haz clic para buscar</p>
-        <span>Soporta .ogg y .mp3</span>
-        <input type="file" id="audio-input" accept="audio/ogg, audio/mp3" style="display: none;">
-    </div>
-
-    <!-- Info del archivo cargado -->
-    <div class="file-info" id="file-info">
-        <strong>Archivo cargado:</strong> <span id="file-name">-</span> <br>
-        <strong>Duración estimada:</strong> <span id="file-duration">-</span>
-    </div>
-
-    <!-- Panel de Controles Simplificado -->
-    <div class="controls-grid">
-        <div class="control-group">
-            <label for="bpm-input">BPM de la Canción</label>
-            <input type="number" id="bpm-input" value="120" min="20" max="300">
-        </div>
-        <div class="control-group">
-            <label for="sensitivity-input">Sensibilidad IA (Umbral)</label>
-            <input type="range" id="sensitivity-input" min="0.1" max="0.9" step="0.05" value="0.3">
-        </div>
-        <div class="control-group">
-            <label for="engine-select">Formato del Engine</label>
-            <select id="engine-select">
-                <option value="vslice">V-Slice (0.3+)</option>
-                <option value="psych">Psych Engine (0.7+)</option>
-            </select>
-        </div>
-    </div>
-
-    <button class="btn-generate" id="btn-generate">Generar Chart Automático</button>
-
-    <!-- Panel de Asistente IA (Gemini Integrado) -->
-    <div class="ia-panel" style="margin-top: 25px; border: 1px solid rgba(0, 242, 254, 0.3); padding: 20px; border-radius: 8px; background: rgba(0, 242, 254, 0.02);">
-        <h3 style="color: var(--accent-color); margin-top: 0; display: flex; align-items: center; gap: 10px;">
-            ✨ Modificador de Chart con IA
-        </h3>
-        <p style="font-size: 0.85rem; color: #85929e; margin-top: -5px; margin-bottom: 20px;">
-            Primero procesa el audio arriba y luego indica aquí la dificultad deseada (easy, normal, hard) y los cambios de ritmo que quieras aplicar.
-        </p>
-
-        <div class="control-group">
-            <label for="ia-prompt" style="color: var(--text-bright); font-weight: 600; margin-bottom: 8px;">¿Cómo quieres personalizar tu chart?</label>
-            <textarea id="ia-prompt" rows="3" style="background-color: #121824; border: 1px solid #34495e; color: var(--text-bright); padding: 10px; border-radius: 6px; font-family: sans-serif; resize: vertical;" placeholder="Ej: quiero una dificultad hard con notas rápidas..."></textarea>
-        </div>
+    <div class="max-w-3xl w-full bg-[#1f2833] border border-cyan-500/10 rounded-2xl p-8 shadow-2xl space-y-6">
         
-        <button class="btn-generate" id="btn-ia-modify" style="background: linear-gradient(45deg, #a855f7, var(--accent-secondary)); margin-top: 15px; margin-bottom: 0;">
-            Aplicar Directivas con IA
+        <!-- Encabezado -->
+        <header class="text-center space-y-2">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00f2fe] to-[#4facfe] tracking-tight uppercase">
+                GCIA Chart
+            </h1>
+            <h4>V0.8 BETA</h4>
+            <p class="text-slate-400 text-sm">
+                Genera charts automáticos para Psych Engine y V-Slice usando el ritmo de la música y las voces
+            </p>
+        </header>
+
+        <!-- Canales de Carga de Archivos (3 Entradas de Audio) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Canal 1: Instrumental (Obligatorio si no hay voces) -->
+            <div class="border-2 border-dashed border-[#00f2fe]/40 hover:border-[#00f2fe] rounded-xl p-4 text-center cursor-pointer transition relative bg-[#121824] hover:shadow-[0_0_15px_rgba(0,242,254,0.15)]">
+                <input type="file" id="file-inst" accept=".ogg,.mp3" class="absolute inset-0 opacity-0 cursor-pointer">
+                <div class="space-y-1">
+                    <span class="block text-xs font-bold uppercase text-[#00f2fe]">Instrumental.ogg</span>
+                    <p class="text-xs text-slate-400" id="status-inst">Arrastra o busca Instrumental</p>
+                </div>
+            </div>
+
+            <!-- Canal 2: Voz Player (Opcional) -->
+            <div class="border-2 border-dashed border-[#4facfe]/40 hover:border-[#4facfe] rounded-xl p-4 text-center cursor-pointer transition relative bg-[#121824] hover:shadow-[0_0_15px_rgba(79,172,254,0.15)]">
+                <input type="file" id="file-v1" accept=".ogg,.mp3" class="absolute inset-0 opacity-0 cursor-pointer">
+                <div class="space-y-1">
+                    <span class="block text-xs font-bold uppercase text-[#4facfe]">Voz 1.ogg (Player)</span>
+                    <p class="text-xs text-slate-400" id="status-v1">Arrastra o busca Voz 1 (Opcional)</p>
+                </div>
+            </div>
+
+            <!-- Canal 3: Voz Oponente (Opcional) -->
+            <div class="border-2 border-dashed border-purple-500/40 hover:border-purple-400 rounded-xl p-4 text-center cursor-pointer transition relative bg-[#121824] hover:shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+                <input type="file" id="file-v2" accept=".ogg,.mp3" class="absolute inset-0 opacity-0 cursor-pointer">
+                <div class="space-y-1">
+                    <span class="block text-xs font-bold uppercase text-purple-400">Voz 2.ogg (Opponent)</span>
+                    <p class="text-xs text-slate-400" id="status-v2">Arrastra o busca Voz 2 (Opcional)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Ajustes / Parámetros -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- BPM -->
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase text-white mb-1.5">BPM de la Canción</label>
+                <input type="number" id="bpm-input" value="120" class="bg-[#121824] border border-[#34495e] text-white rounded-lg p-2.5 text-center font-semibold focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none transition">
+            </div>
+
+            <!-- Dificultad Base -->
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase text-white mb-1.5">Dificultad Base</label>
+                <select id="difficulty-select" class="bg-[#121824] border border-[#34495e] text-white rounded-lg p-2.5 text-center font-semibold focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none transition">
+                    <option value="normal">Normal</option>
+                    <option value="hard">Hard</option>
+                    <option value="easy">Easy</option>
+                </select>
+            </div>
+
+            <!-- Formato Engine Target -->
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase text-white mb-1.5">Formato del Engine</label>
+                <select id="engine-select" class="bg-[#121824] border border-[#34495e] text-white rounded-lg p-2.5 text-center font-semibold focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none transition">
+                    <option value="vslice">V-Slice (0.3+)</option>
+                    <option value="psych">Psych Engine</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Botón de Generar -->
+        <button id="btn-generate" class="w-full bg-gradient-to-r from-[#00f2fe] to-[#4facfe] hover:scale-[1.01] active:scale-[0.99] text-black font-extrabold uppercase py-3.5 px-6 rounded-xl transition-all shadow-lg hover:shadow-cyan-500/20">
+            Generar Chart Automático
         </button>
+
+        <!-- Consola de Logs (Terminal) -->
+        <div id="terminal" class="terminal p-4 rounded-xl text-xs h-32 overflow-y-auto border border-slate-800">
+            [SISTEMA]: Esperando archivos de audio para iniciar análisis...
+        </div>
+
+        <hr class="border-slate-800">
+
+        <!-- Modificador con IA de Gemini -->
+        <div class="space-y-4">
+            <div class="flex items-center space-x-2">
+                <span class="text-xl">✨</span>
+                <h3 class="text-lg font-bold text-white">Modificador de Chart con IA</h3>
+            </div>
+            <p class="text-xs text-slate-400">
+                Pide modificaciones rítmicas, variaciones de dificultad inteligentes o adaptaciones en base a las voces cargadas.
+            </p>
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">¿Cómo quieres que la IA personalice el chart?</label>
+                <textarea id="ia-prompt" placeholder="Ejemplo: Si hay Voz 1 y Voz 2, haz que canten alternándose en modo dueto. En las partes rápidas de la Voz 2 añade jacks..." class="w-full h-24 bg-[#121824] border border-[#34495e] rounded-xl p-3 text-sm focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none resize-none placeholder-slate-600 text-white transition"></textarea>
+            </div>
+
+            <button id="btn-ia-modify" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-xl transition-all active:scale-[0.99]">
+                Aplicar Directivas con IA
+            </button>
+        </div>
+
     </div>
 
-    <!-- Log de lo que hace el script -->
-    <div class="terminal" id="terminal" style="margin-top: 25px;">
-        [Consola]: Esperando archivo de audio y configuración...
-    </div>
-</div>
-
-<script src="js/script.js"></script>
-<script src="api/modify-chart.js"></script>
+    <!-- Carga del Script de Lógica Unificada -->
+    <script src="api/modify-chart.js"></script>
 </body>
 </html>
