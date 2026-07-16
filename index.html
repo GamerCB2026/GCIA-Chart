@@ -3,229 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GCIA CHART - V0.8 BETA</title>
+    <title>FNF AUTO-CHARTER AI | GCIA Chart</title>
+    <!-- Tailwind CSS para el diseño -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-color: #121214;
-            --container-bg: #1a1a1e;
-            --accent-color: #ff007f;
-            --text-color: #e1e1e6;
-            --input-bg: #202024;
-            --border-color: #29292e;
-        }
-
         body {
+            background-color: #0b0c10;
+            color: #c5c6c7;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
-
-        .container {
-            background-color: var(--container-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 24px;
-            width: 90%;
-            max-width: 700px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-        }
-
-        h1 {
-            color: var(--accent-color);
-            margin-top: 0;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .key-section {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        input[type="password"], textarea {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 10px;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        textarea {
-            height: 150px;
-            resize: vertical;
+        /* Personalización de la consola de logs */
+        .terminal {
+            background-color: #05070a;
+            border-left: 3px solid #00f2fe;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 13px;
+            color: #4af626;
         }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
-        button {
-            background-color: var(--accent-color);
-            color: #fff;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s ease, opacity 0.2s ease;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        button.secondary {
-            background-color: #4a5568;
-        }
-
-        button.secondary:hover {
-            background-color: #2d3748;
-        }
-
-        .status {
-            margin-top: 10px;
-            font-size: 13px;
-            font-style: italic;
-        }
-
-        .success { color: #48bb78; }
-        .error { color: #f56565; }
     </style>
 </head>
-<body>
+<body class="p-6 min-h-screen flex flex-col items-center justify-center">
 
-<div class="container">
-    <h1>⚡ GACIA CHART</h1>
-    <h4>V0.8 BETA</h4>
+    <div class="max-w-3xl w-full bg-[#1f2833] border border-cyan-500/10 rounded-2xl p-8 shadow-2xl space-y-6">
+        
+        <!-- Encabezado -->
+        <header class="text-center space-y-2">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00f2fe] to-[#4facfe] tracking-tight uppercase">
+                FNF AUTO-CHARTER AI
+            </h1>
+            <p class="text-slate-400 text-sm">
+                Genera charts automáticos para Psych Engine y V-Slice usando el ritmo de la música y las voces
+            </p>
+        </header>
 
-    <!-- Sección de la API KEY con los dos botones requeridos -->
-    <div class="key-section">
-        <label for="apiKey">Gemini API Key</label>
-        <input type="password" id="apiKey" placeholder="Pega tu API Key aquí...">
-        <div class="btn-group">
-            <button id="btnSaveKey" onclick="saveApiKey()">Guardar API Key 💾</button>
-            <button id="btnRemoveKey" class="secondary" onclick="removeApiKey()">Quitar API Key ❌</button>
-        </div>
-        <div id="keyStatus" class="status"></div>
-    </div>
-
-    <!-- Inputs del Generador -->
-    <div style="margin-bottom: 20px;">
-        <label for="promptInput">Instrucciones / Modificaciones del Chart</label>
-        <textarea id="promptInput" placeholder="Ej: Haz que las notas del jugador de la sección 3 vayan el doble de rápido..."></textarea>
-    </div>
-
-    <button style="width: 100%; padding: 14px;" onclick="generateChart()">Generar Chart al Instante 🚀</button>
-
-    <div id="outputStatus" class="status" style="margin-top: 15px;"></div>
-</div>
-
-<script>
-    // Al cargar la página, verificamos si ya existe una clave guardada
-    window.onload = function() {
-        const savedKey = localStorage.getItem('gemini_api_key');
-        if (savedKey) {
-            const apiInput = document.getElementById('apiKey');
-            apiInput.value = savedKey;
-            apiInput.disabled = true; // Bloqueamos el input para mostrar que está activa
-            showKeyStatus("¡API Key cargada desde la memoria! Ready para usar.", "success");
-        }
-    };
-
-    // Botón 1: Guardar la API Key en LocalStorage
-    function saveApiKey() {
-        const key = document.getElementById('apiKey').value.trim();
-        if (key) {
-            localStorage.setItem('gemini_api_key', key);
-            document.getElementById('apiKey').disabled = true;
-            showKeyStatus("API Key guardada correctamente. No tendrás que volver a escribirla. 🔒", "success");
-        } else {
-            showKeyStatus("Por favor, ingresa una API Key válida primero.", "error");
-        }
-    }
-
-    // Botón 2: Eliminar la API Key y habilitar el campo para otra
-    function removeApiKey() {
-        localStorage.removeItem('gemini_api_key');
-        const apiInput = document.getElementById('apiKey');
-        apiInput.value = "";
-        apiInput.disabled = false;
-        showKeyStatus("API Key removida. Puedes ingresar una nueva.", "success");
-    }
-
-    function showKeyStatus(msg, type) {
-        const statusDiv = document.getElementById('keyStatus');
-        statusDiv.className = `status ${type}`;
-        statusDiv.innerText = msg;
-    }
-
-    // Lógica optimizada de Generación de Alta Velocidad
-    async function generateChart() {
-        const apiKey = localStorage.getItem('gemini_api_key') || document.getElementById('apiKey').value.trim();
-        const promptText = document.getElementById('promptInput').value.trim();
-        const outputStatus = document.getElementById('outputStatus');
-
-        if (!apiKey) {
-            outputStatus.className = "status error";
-            outputStatus.innerText = "Error: Necesitas meter tu API Key primero.";
-            return;
-        }
-
-        outputStatus.className = "status";
-        outputStatus.innerText = "Procesando cambios a la velocidad del rayo... ⚡";
-
-        try {
-            // Lógica de llamada ultra-rápida (puedes enlazar aquí tu endpoint del SDK o tu API directa)
-            // Diseñamos el prompt del sistema de forma ultra directa para que la IA no pierda milisegundos analizando detalles inútiles.
-            const systemInstructions = "Actúa como un compilador JSON de alta velocidad. Procesa los datos y devuelve únicamente el JSON final sin explicaciones ni markdown.";
-
-            // Simulación de respuesta rápida estructurando el JSON final
-            // NOTA: Cuando hagas tu fetch a la API de Gemini, asegúrate de pasarle la estructura final requerida:
+        <!-- SECCIÓN DE API KEY (Integrada con la estética de tu app) -->
+        <div class="bg-[#121824] border border-[#34495e] rounded-xl p-4 space-y-3">
+            <div class="flex items-center justify-between">
+                <label for="apiKey" class="text-xs font-bold uppercase text-[#00f2fe]">Gemini API Key</label>
+                <span id="keyStatus" class="text-[11px] font-semibold text-slate-400">Sin guardar</span>
+            </div>
+            <input type="password" id="apiKey" placeholder="Pega tu API Key de Gemini aquí..." class="w-full bg-[#05070a] border border-[#34495e] text-white rounded-lg p-2.5 text-sm focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none transition">
             
-            /*
-            Estructura objetivo garantizada:
-            {
-                "version": "2.0.0",
-                "scrollSpeed": { "normal": X.X },
-                "events": [],  <-- Vacío por defecto como pediste
-                "notes": { ... },
-                "generatedBy": "FNF-PACKER-Player-Atlas" <-- Al puro final
+            <div class="flex gap-3">
+                <button id="btnSaveKey" onclick="saveApiKey()" class="flex-1 bg-gradient-to-r from-[#00f2fe] to-[#4facfe] hover:opacity-90 active:scale-[0.99] text-black font-bold text-xs uppercase py-2 px-4 rounded-lg transition-all">
+                    Guardar API Key 💾
+                </button>
+                <button id="btnRemoveKey" onclick="removeApiKey()" class="flex-1 bg-red-950/40 hover:bg-red-900/50 border border-red-500/30 text-red-400 font-bold text-xs uppercase py-2 px-4 rounded-lg transition-all active:scale-[0.99]">
+                    Quitar API Key ❌
+                </button>
+            </div>
+        </div>
+
+        <!-- Canales de Carga de Archivos (3 Entradas de Audio) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Canal 1: Instrumental -->
+            <div class="border-2 border-dashed border-[#00f2fe]/40 hover:border-[#00f2fe] rounded-xl p-4 text-center cursor-pointer transition relative bg-[#121824] hover:shadow-[0_0_15px_rgba(0,242,254,0.15)]">
+                <input type="file" id="file-inst" accept=".ogg,.mp3" class="absolute inset-0 opacity-0 cursor-pointer">
+                <div class="space-y-1">
+                    <span class="block text-xs font-bold uppercase text-[#00f2fe]">Instrumental.ogg</span>
+                    <p class="text-xs text-slate-400" id="status-inst">Arrastra o busca Instrumental</p>
+                </div>
+            </div>
+
+            <!-- Canal 2: Voz Player -->
+            <div class="border-2 border-dashed border-[#4facfe]/40 hover:border-[#4facfe] rounded-xl p-4 text-center cursor-pointer transition relative bg-[#121824] hover:shadow-[0_0_15px_rgba(79,172,254,0.15)]">
+                <input type="file" id="file-v1" accept=".ogg,.mp3" class="absolute inset-0 opacity-0 cursor-pointer">
+                <div class="space-y-1">
+                    <span class="block text-xs font-bold uppercase text-[#4facfe]">Voz 1.ogg (Player)</span>
+                    <p class="text-xs text-slate-400" id="status-v1">Arrastra o busca Voz 1 (Opcional)</p>
+                </div>
+            </div>
+
+            <!-- Canal 3: Voz Oponente -->
+            <div class="border-2 border-dashed border-purple-500/40 hover:border-purple-400 rounded-xl p-4 text-center cursor-pointer transition relative bg-[#121824] hover:shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+                <input type="file" id="file-v2" accept=".ogg,.mp3" class="absolute inset-0 opacity-0 cursor-pointer">
+                <div class="space-y-1">
+                    <span class="block text-xs font-bold uppercase text-purple-400">Voz 2.ogg (Opponent)</span>
+                    <p class="text-xs text-slate-400" id="status-v2">Arrastra o busca Voz 2 (Opcional)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Ajustes / Parámetros -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- BPM -->
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase text-white mb-1.5">BPM de la Canción</label>
+                <input type="number" id="bpm-input" value="120" class="bg-[#121824] border border-[#34495e] text-white rounded-lg p-2.5 text-center font-semibold focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none transition">
+            </div>
+
+            <!-- Dificultad Base -->
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase text-white mb-1.5">Dificultad Base</label>
+                <select id="difficulty-select" class="bg-[#121824] border border-[#34495e] text-white rounded-lg p-2.5 text-center font-semibold focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none transition">
+                    <option value="normal">Normal</option>
+                    <option value="hard">Hard</option>
+                    <option value="easy">Easy</option>
+                </select>
+            </div>
+
+            <!-- Formato Engine Target -->
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase text-white mb-1.5">Formato del Engine</label>
+                <select id="engine-select" class="bg-[#121824] border border-[#34495e] text-white rounded-lg p-2.5 text-center font-semibold focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none transition">
+                    <option value="vslice">V-Slice (0.3+)</option>
+                    <option value="psych">Psych Engine</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Botón de Generar -->
+        <button id="btn-generate" class="w-full bg-gradient-to-r from-[#00f2fe] to-[#4facfe] hover:scale-[1.01] active:scale-[0.99] text-black font-extrabold uppercase py-3.5 px-6 rounded-xl transition-all shadow-lg hover:shadow-cyan-500/20">
+            Generar Chart Automático
+        </button>
+
+        <!-- Consola de Logs (Terminal) -->
+        <div id="terminal" class="terminal p-4 rounded-xl text-xs h-32 overflow-y-auto border border-slate-800">
+            [SISTEMA]: Esperando archivos de audio para iniciar análisis...
+        </div>
+
+        <hr class="border-slate-800">
+
+        <!-- Modificador con IA de Gemini -->
+        <div class="space-y-4">
+            <div class="flex items-center space-x-2">
+                <span class="text-xl">✨</span>
+                <h3 class="text-lg font-bold text-white">Modificador de Chart con IA</h3>
+            </div>
+            <p class="text-xs text-slate-400">
+                Pide modificaciones rítmicas, variaciones de dificultad inteligentes o adaptaciones en base a las voces cargadas.
+            </p>
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-400 mb-2">¿Cómo quieres que la IA personalice el chart?</label>
+                <textarea id="ia-prompt" placeholder="Ejemplo: Si hay Voz 1 y Voz 2, haz que canten alternándose en modo dueto. En las partes rápidas de la Voz 2 añade jacks..." class="w-full h-24 bg-[#121824] border border-[#34495e] rounded-xl p-3 text-sm focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none resize-none placeholder-slate-600 text-white transition"></textarea>
+            </div>
+
+            <button id="btn-ia-modify" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-xl transition-all active:scale-[0.99]">
+                Aplicar Directivas con IA
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Scripts de Control LocalStorage para la Key -->
+    <script>
+        // Cargar Key al iniciar
+        window.onload = function() {
+            const savedKey = localStorage.getItem('gemini_api_key');
+            const keyInput = document.getElementById('apiKey');
+            const keyStatus = document.getElementById('keyStatus');
+
+            if (savedKey) {
+                keyInput.value = savedKey;
+                keyInput.disabled = true;
+                keyStatus.innerText = "¡Clave Activa! 🔒";
+                keyStatus.className = "text-[11px] font-bold text-emerald-400";
+                logToTerminal("[SISTEMA]: API Key recuperada de la memoria con éxito.");
+            } else {
+                logToTerminal("[SISTEMA]: No se detectó ninguna API Key. Regístrala arriba para usar las funciones de IA.");
             }
-            */
+        };
 
-            // Aquí agregarías tu llamada fetch real:
-            // const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, { ... });
+        function saveApiKey() {
+            const keyInput = document.getElementById('apiKey');
+            const keyStatus = document.getElementById('keyStatus');
+            const key = keyInput.value.trim();
 
-            outputStatus.className = "status success";
-            outputStatus.innerText = "¡Generado con éxito en tiempo récord! (Descargando archivo...)";
-
-        } catch (err) {
-            outputStatus.className = "status error";
-            outputStatus.innerText = "Ocurrió un error al generar: " + err.message;
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+                keyInput.disabled = true;
+                keyStatus.innerText = "¡Clave Guardada! 🔒";
+                keyStatus.className = "text-[11px] font-bold text-emerald-400";
+                logToTerminal("[SISTEMA]: API Key guardada en LocalStorage.");
+            } else {
+                keyStatus.innerText = "Vacía";
+                keyStatus.className = "text-[11px] font-semibold text-red-400";
+                logToTerminal("[SISTEMA]: ERROR - No puedes guardar una llave vacía.");
+            }
         }
-    }
-</script>
 
+        function removeApiKey() {
+            localStorage.removeItem('gemini_api_key');
+            const keyInput = document.getElementById('apiKey');
+            const keyStatus = document.getElementById('keyStatus');
+
+            keyInput.value = "";
+            keyInput.disabled = false;
+            keyStatus.innerText = "Removida ❌";
+            keyStatus.className = "text-[11px] font-semibold text-amber-400";
+            logToTerminal("[SISTEMA]: API Key borrada de la memoria del navegador.");
+        }
+
+        function logToTerminal(message) {
+            const term = document.getElementById('terminal');
+            if (term) {
+                term.innerHTML += `<br>${message}`;
+                term.scrollTop = term.scrollHeight;
+            }
+        }
+    </script>
+
+    <!-- Carga del Script de tu Lógica Unificada original -->
+    <script src="api/modify-chart.js"></script>
 </body>
 </html>
