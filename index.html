@@ -35,27 +35,9 @@
             </p>
         </header>
 
-        <!-- SECCIÓN DE API KEY (Integrada con la estética de tu app) -->
-        <div class="bg-[#121824] border border-[#34495e] rounded-xl p-4 space-y-3">
-            <div class="flex items-center justify-between">
-                <label for="apiKey" class="text-xs font-bold uppercase text-[#00f2fe]">Gemini API Key</label>
-                <span id="keyStatus" class="text-[11px] font-semibold text-slate-400">Sin guardar</span>
-            </div>
-            <input type="password" id="apiKey" placeholder="Pega tu API Key de Gemini aquí..." class="w-full bg-[#05070a] border border-[#34495e] text-white rounded-lg p-2.5 text-sm focus:border-[#00f2fe] focus:ring-1 focus:ring-[#00f2fe] outline-none transition">
-            
-            <div class="flex gap-3">
-                <button id="btnSaveKey" onclick="saveApiKey()" class="flex-1 bg-gradient-to-r from-[#00f2fe] to-[#4facfe] hover:opacity-90 active:scale-[0.99] text-black font-bold text-xs uppercase py-2 px-4 rounded-lg transition-all">
-                    Guardar API Key 💾
-                </button>
-                <button id="btnRemoveKey" onclick="removeApiKey()" class="flex-1 bg-red-950/40 hover:bg-red-900/50 border border-red-500/30 text-red-400 font-bold text-xs uppercase py-2 px-4 rounded-lg transition-all active:scale-[0.99]">
-                    Quitar API Key ❌
-                </button>
-            </div>
-        </div>
-
         <!-- Canales de Carga de Archivos (3 Entradas de Audio) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Canal 1: Instrumental -->
+            <!-- Canal 1: Instrumental (Obligatorio si no hay voces) -->
             <div class="border-2 border-dashed border-[#00f2fe]/40 hover:border-[#00f2fe] rounded-xl p-4 text-center cursor-pointer transition relative bg-[#121824] hover:shadow-[0_0_15px_rgba(0,242,254,0.15)]">
                 <input type="file" id="file-inst" accept=".ogg,.mp3" class="absolute inset-0 opacity-0 cursor-pointer">
                 <div class="space-y-1">
@@ -64,7 +46,7 @@
                 </div>
             </div>
 
-            <!-- Canal 2: Voz Player -->
+            <!-- Canal 2: Voz Player (Opcional) -->
             <div class="border-2 border-dashed border-[#4facfe]/40 hover:border-[#4facfe] rounded-xl p-4 text-center cursor-pointer transition relative bg-[#121824] hover:shadow-[0_0_15px_rgba(79,172,254,0.15)]">
                 <input type="file" id="file-v1" accept=".ogg,.mp3" class="absolute inset-0 opacity-0 cursor-pointer">
                 <div class="space-y-1">
@@ -73,7 +55,7 @@
                 </div>
             </div>
 
-            <!-- Canal 3: Voz Oponente -->
+            <!-- Canal 3: Voz Oponente (Opcional) -->
             <div class="border-2 border-dashed border-purple-500/40 hover:border-purple-400 rounded-xl p-4 text-center cursor-pointer transition relative bg-[#121824] hover:shadow-[0_0_15px_rgba(168,85,247,0.15)]">
                 <input type="file" id="file-v2" accept=".ogg,.mp3" class="absolute inset-0 opacity-0 cursor-pointer">
                 <div class="space-y-1">
@@ -145,65 +127,7 @@
 
     </div>
 
-    <!-- Scripts de Control LocalStorage para la Key -->
-    <script>
-        // Cargar Key al iniciar
-        window.onload = function() {
-            const savedKey = localStorage.getItem('gemini_api_key');
-            const keyInput = document.getElementById('apiKey');
-            const keyStatus = document.getElementById('keyStatus');
-
-            if (savedKey) {
-                keyInput.value = savedKey;
-                keyInput.disabled = true;
-                keyStatus.innerText = "¡Clave Activa! 🔒";
-                keyStatus.className = "text-[11px] font-bold text-emerald-400";
-                logToTerminal("[SISTEMA]: API Key recuperada de la memoria con éxito.");
-            } else {
-                logToTerminal("[SISTEMA]: No se detectó ninguna API Key. Regístrala arriba para usar las funciones de IA.");
-            }
-        };
-
-        function saveApiKey() {
-            const keyInput = document.getElementById('apiKey');
-            const keyStatus = document.getElementById('keyStatus');
-            const key = keyInput.value.trim();
-
-            if (key) {
-                localStorage.setItem('gemini_api_key', key);
-                keyInput.disabled = true;
-                keyStatus.innerText = "¡Clave Guardada! 🔒";
-                keyStatus.className = "text-[11px] font-bold text-emerald-400";
-                logToTerminal("[SISTEMA]: API Key guardada en LocalStorage.");
-            } else {
-                keyStatus.innerText = "Vacía";
-                keyStatus.className = "text-[11px] font-semibold text-red-400";
-                logToTerminal("[SISTEMA]: ERROR - No puedes guardar una llave vacía.");
-            }
-        }
-
-        function removeApiKey() {
-            localStorage.removeItem('gemini_api_key');
-            const keyInput = document.getElementById('apiKey');
-            const keyStatus = document.getElementById('keyStatus');
-
-            keyInput.value = "";
-            keyInput.disabled = false;
-            keyStatus.innerText = "Removida ❌";
-            keyStatus.className = "text-[11px] font-semibold text-amber-400";
-            logToTerminal("[SISTEMA]: API Key borrada de la memoria del navegador.");
-        }
-
-        function logToTerminal(message) {
-            const term = document.getElementById('terminal');
-            if (term) {
-                term.innerHTML += `<br>${message}`;
-                term.scrollTop = term.scrollHeight;
-            }
-        }
-    </script>
-
-    <!-- Carga del Script de tu Lógica Unificada original -->
+    <!-- Carga del Script de Lógica Unificada -->
     <script src="api/modify-chart.js"></script>
 </body>
 </html>
